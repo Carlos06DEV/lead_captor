@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparar Seguidores</title>
+    <style>
+        #progressBarContainer {
+            width: 100%;
+            background-color: #f3f3f3;
+            display: none;
+            margin-top: 10px;
+        }
+        #progressBar {
+            width: 0%;
+            height: 20px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <h1>Comparar Seguidores</h1>
@@ -17,6 +33,10 @@
         <button type="submit">Comparar</button>
     </form>
 
+    <div id="progressBarContainer">
+        <div id="progressBar">0%</div>
+    </div>
+
     <h2>Seguidores Comuns</h2>
     <ul id="commomList"></ul>
 
@@ -26,6 +46,23 @@
 
             const user = document.getElementById("user").value;
             const alvo = document.getElementById("alvo").value;
+            const progressBarContainer = document.getElementById("progressBarContainer");
+            const progressBar = document.getElementById("progressBar");
+
+            progressBarContainer.style.display = "block";
+            progressBar.style.width = "0%";
+            progressBar.textContent = "0%";
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                if (progress >= 90) {
+                    clearInterval(interval);
+                } else {
+                    progress += 10;
+                    progressBar.style.width = progress + "%";
+                    progressBar.textContent = progress + "%";
+                }
+            }, 500);
 
             fetch("https://1828-177-115-21-141.ngrok-free.app/comparar", {
                 method: "POST",
@@ -39,6 +76,10 @@
             })
             .then(response => response.json())
             .then(data => {
+                clearInterval(interval);
+                progressBar.style.width = "100%";
+                progressBar.textContent = "100%";
+
                 const commomList = document.getElementById("commomList");
                 commomList.innerHTML = "";
                 data.forEach(follower => {
@@ -46,8 +87,15 @@
                     li.textContent = follower;
                     commomList.appendChild(li);
                 });
+                
+                setTimeout(() => {
+                    progressBarContainer.style.display = "none";
+                }, 1000);
             })
             .catch(error => {
+                clearInterval(interval);
+                progressBar.style.width = "0%";
+                progressBarContainer.style.display = "none";
                 console.error("Erro:", error);
             });
         });
